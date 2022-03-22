@@ -43,6 +43,7 @@ type CreateConnectionProps = {
   destination?: Destination;
   sourceDefinition?: SourceDefinition | { name: string; sourceDefinitionId: string };
   destinationDefinition?: { name: string; destinationDefinitionId: string };
+  sourceCatalogId: string;
 };
 
 type UpdateConnection = {

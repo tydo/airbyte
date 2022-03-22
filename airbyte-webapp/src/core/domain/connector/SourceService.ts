@@ -94,6 +94,7 @@ class SourceService extends AirbyteRequestService {
     return {
       catalog: result.catalog,
       jobInfo: result.jobInfo,
+      catalogId: result.sourceCatalogId,
       id: sourceId,
     };
   }

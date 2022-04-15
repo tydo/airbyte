@@ -58,11 +58,8 @@ public class RedshiftDestination extends SwitchingDestination<RedshiftDestinatio
     final var accessKeyIdNode = config.get("access_key_id");
     final var secretAccessKeyNode = config.get("secret_access_key");
 
-    // Since region is a Json schema enum with an empty string default, we consider the empty string an
-    // unset field.
-    final var emptyRegion = regionNode == null || regionNode.asText().equals("");
-
-    if (bucketNode == null && emptyRegion && accessKeyIdNode == null && secretAccessKeyNode == null) {
+    if (isNullOrEmpty(bucketNode) && isNullOrEmpty(regionNode) && isNullOrEmpty(accessKeyIdNode)
+        && isNullOrEmpty(secretAccessKeyNode)) {
       return false;
     }
 
@@ -77,6 +74,10 @@ public class RedshiftDestination extends SwitchingDestination<RedshiftDestinatio
     LOGGER.info("starting destination: {}", RedshiftDestination.class);
     new IntegrationRunner(destination).run(args);
     LOGGER.info("completed destination: {}", RedshiftDestination.class);
+  }
+
+  private static boolean isNullOrEmpty(JsonNode jsonNode) {
+    return jsonNode == null || jsonNode.asText().equals("");
   }
 
 }

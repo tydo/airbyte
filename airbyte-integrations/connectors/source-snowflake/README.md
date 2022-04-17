@@ -27,7 +27,7 @@
   "warehouse": "AIRBYTE_WAREHOUSE",
   "database": "AIRBYTE_DATABASE",
   "schema": "AIRBYTE_SCHEMA",
-  "credentails" {
+  "credentials" {
     "auth_type": "Client",
     "client_id": "client_id",
     "access_token": "**********",

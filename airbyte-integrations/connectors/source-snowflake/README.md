@@ -13,7 +13,7 @@
   "warehouse": "AIRBYTE_WAREHOUSE",
   "database": "AIRBYTE_DATABASE",
   "schema": "AIRBYTE_SCHEMA",
-  "credentails" {
+  "credentials" {
     "username": "AIRBYTE_USER",
     "password": "SOMEPASSWORD"
   }

@@ -69,6 +69,7 @@ public class SnowflakeSource extends AbstractJdbcSource<JDBCType> implements Sou
         default -> throw new IllegalArgumentException("Unrecognized auth type: " + authType);
       };
     } else {
+      // This is the backwards-compatibility case (i.e. this handles configs created from before oauth was added to this connector)
       return buildUsernamePasswordConfig(config, jdbcUrl);
     }
   }

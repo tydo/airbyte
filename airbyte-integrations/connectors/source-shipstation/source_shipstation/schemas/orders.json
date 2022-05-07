@@ -24,13 +24,13 @@
       "type": "string"
     },
     "shipByDate": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "orderStatus": {
       "type": "string"
     },
     "customerId": {
-      "type": "integer"
+      "type": ["integer", "null"]
     },
     "customerUsername": {
       "type": "string"
@@ -45,37 +45,37 @@
           "type": "string"
         },
         "company": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "street1": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "street2": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "street3": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "city": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "state": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "postalCode": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "country": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "phone": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "residential": {
-          "type": "null"
+          "type": ["null", "boolean"]
         },
         "addressVerified": {
-          "type": "null"
+          "type": ["null", "boolean"]
         }
       },
       "required": [
@@ -100,16 +100,16 @@
           "type": "string"
         },
         "company": {
-          "type": "string"
+          "type": ["string", "null"]
         },
         "street1": {
           "type": "string"
         },
         "street2": {
-          "type": "string"
+          "type": ["string", "null"]
         },
         "street3": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "city": {
           "type": "string"
@@ -124,10 +124,10 @@
           "type": "string"
         },
         "phone": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "residential": {
-          "type": "boolean"
+          "type": ["boolean", "null"]
         },
         "addressVerified": {
           "type": "string"
@@ -149,101 +149,7 @@
       ]
     },
     "items": {
-      "type": "array",
-      "items": [
-        {
-          "type": "object",
-          "properties": {
-            "orderItemId": {
-              "type": "integer"
-            },
-            "lineItemKey": {
-              "type": "null"
-            },
-            "sku": {
-              "type": "string"
-            },
-            "name": {
-              "type": "string"
-            },
-            "imageUrl": {
-              "type": "null"
-            },
-            "weight": {
-              "type": "object",
-              "properties": {
-                "value": {
-                  "type": "number"
-                },
-                "units": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "value",
-                "units"
-              ]
-            },
-            "quantity": {
-              "type": "integer"
-            },
-            "unitPrice": {
-              "type": "number"
-            },
-            "taxAmount": {
-              "type": "number"
-            },
-            "shippingAmount": {
-              "type": "number"
-            },
-            "warehouseLocation": {
-              "type": "string"
-            },
-            "options": {
-              "type": "array",
-              "items": {}
-            },
-            "productId": {
-              "type": "integer"
-            },
-            "fulfillmentSku": {
-              "type": "string"
-            },
-            "adjustment": {
-              "type": "boolean"
-            },
-            "upc": {
-              "type": "null"
-            },
-            "createDate": {
-              "type": "string"
-            },
-            "modifyDate": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "orderItemId",
-            "lineItemKey",
-            "sku",
-            "name",
-            "imageUrl",
-            "weight",
-            "quantity",
-            "unitPrice",
-            "taxAmount",
-            "shippingAmount",
-            "warehouseLocation",
-            "options",
-            "productId",
-            "fulfillmentSku",
-            "adjustment",
-            "upc",
-            "createDate",
-            "modifyDate"
-          ]
-        }
-      ]
+      "type": "array"
     },
     "orderTotal": {
       "type": "number"
@@ -258,10 +164,10 @@
       "type": "number"
     },
     "customerNotes": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "internalNotes": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "gift": {
       "type": "boolean"
@@ -273,22 +179,22 @@
       "type": "null"
     },
     "requestedShippingService": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "carrierCode": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "serviceCode": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "packageCode": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "confirmation": {
       "type": "string"
     },
     "shipDate": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "holdUntilDate": {
       "type": "null"
@@ -354,46 +260,13 @@
       "type": "object",
       "properties": {
         "contents": {
-          "type": "string"
+          "type": ["string", "null"]
         },
         "customsItems": {
-          "type": "array",
-          "items": [
-            {
-              "type": "object",
-              "properties": {
-                "customsItemId": {
-                  "type": "integer"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "quantity": {
-                  "type": "integer"
-                },
-                "value": {
-                  "type": "number"
-                },
-                "harmonizedTariffCode": {
-                  "type": "null"
-                },
-                "countryOfOrigin": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "customsItemId",
-                "description",
-                "quantity",
-                "value",
-                "harmonizedTariffCode",
-                "countryOfOrigin"
-              ]
-            }
-          ]
+          "type": ["array", "null"]
         },
         "nonDelivery": {
-          "type": "string"
+          "type": ["string", "null"]
         }
       },
       "required": [
@@ -431,25 +304,25 @@
           "type": "integer"
         },
         "customField1": {
-          "type": "string"
+          "type": ["string", "null"]
         },
         "customField2": {
-          "type": "string"
+          "type": ["string", "null"]
         },
         "customField3": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "source": {
           "type": "null"
         },
         "billToParty": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "billToAccount": {
           "type": "null"
         },
         "billToPostalCode": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "billToCountryCode": {
           "type": "null"
@@ -478,7 +351,7 @@
       "type": "null"
     },
     "userId": {
-      "type": "null"
+      "type": ["null", "string"]
     },
     "externallyFulfilled": {
       "type": "boolean"

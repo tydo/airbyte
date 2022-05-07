@@ -15,13 +15,13 @@
       "type": "string"
     },
     "accountName": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "email": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "integrationUrl": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "active": {
       "type": "boolean"
@@ -30,19 +30,19 @@
       "type": "string"
     },
     "phone": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "publicEmail": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "website": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "refreshDate": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "lastRefreshAttempt": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "createDate": {
       "type": "string"
@@ -54,7 +54,7 @@
       "type": "boolean"
     },
     "statusMappings": {
-      "type": "string"
+      "type": ["string", "null"]
     }
   },
   "required": []

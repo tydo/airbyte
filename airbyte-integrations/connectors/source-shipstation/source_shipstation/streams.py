@@ -45,7 +45,7 @@ class ShipstationStream(HttpStream, ABC):
         """
         :return an iterable containing each record in the response
         """
-        yield {}
+        yield from response.json()
 
 
 class Customers(ShipstationStream):

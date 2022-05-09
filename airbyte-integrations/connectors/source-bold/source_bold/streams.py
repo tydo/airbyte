@@ -95,9 +95,18 @@ class IncrementalBoldStream(BoldStream, ABC):
                 datetime.datetime.min.time()
             ).strftime("%Y-%m-%dT%H:%M:%SZ")
         )
-        state_dt = self._convert_date_to_timestamp(current_stream_state.get(self.cursor_field, base_date))
-        latest_record = self._convert_date_to_timestamp(latest_record.get(self.cursor_field, base_date))
-        return {self.cursor_field: max(latest_record, state_dt)}
+        current_stream_state = current_stream_state.get(self.cursor_field, base_date)
+        latest_record = latest_record.get(self.cursor_field, base_date)
+
+        if not isinstance(current_stream_state, str):
+            current_stream_state = current_stream_state.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        if not isinstance(latest_record, str):
+            latest_record = latest_record.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        state_dt = self._convert_date_to_timestamp(current_stream_state)
+        latest_record = self._convert_date_to_timestamp(latest_record)
+        return {self.cursor_field: max(latest_record, state_dt).strftime("%Y-%m-%dT%H:%M:%SZ")}
 
 
 class Customers(IncrementalBoldStream):

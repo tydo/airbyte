@@ -1,4 +1,5 @@
 from typing import Any, List, Mapping, Tuple
+import requests
 
 from airbyte_cdk.sources import AbstractSource
 from airbyte_cdk.sources.streams import Stream
@@ -17,11 +18,17 @@ class SourceBold(AbstractSource):
         """
         ok = False
         error_msg = None
-        token = TokenAuthenticator(config.get("access_token"))
 
         try:
-            Customers(config=config, authenticator=token)
-            ok = True
+            response = requests.request(
+                "GET",
+                "https://api.boldcommerce.com/shops/v1/info",
+                headers={"Authorization": f"Bearer {config.get('access_token')}"},
+                data={}
+            )
+
+            if response.status_code == 200:
+                ok = True
         except Exception as e:
             error_msg = repr(e)
 

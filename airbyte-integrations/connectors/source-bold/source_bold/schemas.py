@@ -49,9 +49,9 @@ class BaseSchemaModel(BaseModel):
 
     @classmethod
     def schema(cls, **kwargs) -> Dict[str, Any]:
-        """We're overriding the schema classmethod to enable some post-processing"""
+        """We"re overriding the schema classmethod to enable some post-processing"""
         schema = super().schema(**kwargs)
-        cls._expand_refs(schema)  # UI and destination doesn't support $ref's
+        cls._expand_refs(schema)  # UI and destination doesn"t support $ref"s
         schema.pop("definitions", None)  # remove definitions created by $ref
         return schema
 
@@ -76,7 +76,7 @@ class Customer(TimeStampBaseSchemaModel):
     last_name: str
     email: str
     platform_type: str
-    list_type: str
+    list_type: Optional[str]
     folder: Optional[str]
     address: Optional[list[Address]]
 

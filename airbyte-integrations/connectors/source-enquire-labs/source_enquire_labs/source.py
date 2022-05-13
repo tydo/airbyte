@@ -89,6 +89,11 @@ class IncrementalEnquireLabsStream(EnquireLabsStream, ABC):
 
         return {self.cursor_field: max(latest_record, state_dt).strftime("%Y-%m-%dT%H:%M:%S+00:00")}
 
+    def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
+        for record in super().parse_response(response=response, stream_state=stream_state, **kwargs):
+            if self.cursor_field not in stream_state or record[self.cursor_field] > stream_state[self.cursor_field]:
+                yield record
+
 
 class QuestionStream(IncrementalEnquireLabsStream):
     primary_key = "id"

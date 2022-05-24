@@ -83,7 +83,7 @@ class IncrementalJunipReviewsStream(JunipReviewsStream, ABC):
         usually id or date based. This field's presence tells the framework this in an incremental stream. Required for incremental.
         :return str: The name of the cursor field.
         """
-        pass
+        return "created_at"
 
     def _convert_date_to_timestamp(self, date: datetime):
         return datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -99,11 +99,12 @@ class IncrementalJunipReviewsStream(JunipReviewsStream, ABC):
                 datetime.datetime.min.time()
             ).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         )
+
         state_dt = current_stream_state.get(self.cursor_field, base_date)
         if isinstance(state_dt, str):
             state_dt = self._convert_date_to_timestamp(state_dt)
 
-        latest_record = latest_record.get(self.cursor_field, base_date)
+        latest_record = latest_record.get(self.cursor_field)
         if isinstance(latest_record, str):
             latest_record = self._convert_date_to_timestamp(latest_record)
 
@@ -119,14 +120,17 @@ class Products(IncrementalJunipReviewsStream):
     cursor_field = "created_at"
     primary_key = "id"
 
-    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+    def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
         """
         Ref: https://junip.co/docs/api/
         """
 
         json_response = response.json()
         for product in json_response.get("products"):
-            yield product
+            product[self.cursor_field] = (datetime.datetime.strptime(product[self.cursor_field], "%Y-%m-%dT%H:%M:%S.%fZ")).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+            if self.cursor_field not in stream_state or product[self.cursor_field] > stream_state[self.cursor_field]:
+                yield product
 
 
 class ProductOverviews(IncrementalJunipReviewsStream):
@@ -138,14 +142,17 @@ class ProductOverviews(IncrementalJunipReviewsStream):
     cursor_field = "created_at"
     primary_key = "id"
 
-    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+    def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
         """
         Ref: https://junip.co/docs/api/
         """
 
         json_response = response.json()
         for product_overview in json_response.get("product_overviews"):
-            yield product_overview
+            product_overview[self.cursor_field] = (datetime.datetime.strptime(product_overview[self.cursor_field], "%Y-%m-%dT%H:%M:%S.%fZ")).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+            if self.cursor_field not in stream_state or product_overview[self.cursor_field] > stream_state[self.cursor_field]:
+                yield product_overview
 
 
 class ProductReviews(IncrementalJunipReviewsStream):
@@ -157,14 +164,18 @@ class ProductReviews(IncrementalJunipReviewsStream):
     cursor_field = "created_at"
     primary_key = "id"
 
-    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+    def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
         """
         Ref: https://junip.co/docs/api/
         """
 
         json_response = response.json()
         for product_reviews in json_response.get("product_reviews"):
-            yield product_reviews
+            product_reviews[self.cursor_field] = (datetime.datetime.strptime(product_reviews[self.cursor_field], "%Y-%m-%dT%H:%M:%S.%fZ")).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+            if self.cursor_field not in stream_state or product_reviews[self.cursor_field] > stream_state[self.cursor_field]:
+
+                yield product_reviews
 
 
 class Stores(IncrementalJunipReviewsStream):
@@ -176,14 +187,18 @@ class Stores(IncrementalJunipReviewsStream):
     cursor_field = "created_at"
     primary_key = "id"
 
-    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+    def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
         """
         Ref: https://junip.co/docs/api/
         """
 
         json_response = response.json()
         for store in json_response.get("stores"):
-            yield store
+            store[self.cursor_field] = (datetime.datetime.strptime(store[self.cursor_field], "%Y-%m-%dT%H:%M:%S.%fZ")).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+            if self.cursor_field not in stream_state or store[self.cursor_field] > stream_state[self.cursor_field]:
+
+                yield store
 
 
 class StoreReviews(IncrementalJunipReviewsStream):
@@ -195,11 +210,14 @@ class StoreReviews(IncrementalJunipReviewsStream):
     cursor_field = "created_at"
     primary_key = "id"
 
-    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+    def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
         """
         Ref: https://junip.co/docs/api/
         """
 
         json_response = response.json()
         for store_reviews in json_response.get("store_reviews"):
-            yield store_reviews
+            store_reviews[self.cursor_field] = (datetime.datetime.strptime(store_reviews[self.cursor_field], "%Y-%m-%dT%H:%M:%S.%fZ")).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            if self.cursor_field not in stream_state or store_reviews[self.cursor_field] > stream_state[self.cursor_field]:
+
+                yield store_reviews

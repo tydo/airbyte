@@ -5,7 +5,7 @@
       "supported_sync_modes": [
         "full_refresh"
       ],
-      "source_defined_cursor": false,
+      "source_defined_cursor": true,
       "json_schema": {}
     },
     {
@@ -13,7 +13,7 @@
       "supported_sync_modes": [
         "full_refresh"
       ],
-      "source_defined_cursor": false,
+      "source_defined_cursor": true,
       "json_schema": {}
     },
     {
@@ -21,7 +21,7 @@
       "supported_sync_modes": [
         "full_refresh"
       ],
-      "source_defined_cursor": false,
+      "source_defined_cursor": true,
       "json_schema": {}
     },
     {
@@ -29,7 +29,7 @@
       "supported_sync_modes": [
         "full_refresh"
       ],
-      "source_defined_cursor": false,
+      "source_defined_cursor": true,
       "json_schema": {}
     },
     {
@@ -37,7 +37,7 @@
       "supported_sync_modes": [
         "full_refresh"
       ],
-      "source_defined_cursor": false,
+      "source_defined_cursor": true,
       "json_schema": {}
     },
     {
@@ -45,7 +45,7 @@
       "supported_sync_modes": [
         "full_refresh"
       ],
-      "source_defined_cursor": false,
+      "source_defined_cursor": true,
       "json_schema": {}
     }
   ]

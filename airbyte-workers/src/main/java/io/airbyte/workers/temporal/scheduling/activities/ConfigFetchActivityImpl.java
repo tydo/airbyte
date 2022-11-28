@@ -4,7 +4,12 @@
 
 package io.airbyte.workers.temporal.scheduling.activities;
 
-import com.google.common.annotations.VisibleForTesting;
+import static io.airbyte.metrics.lib.ApmTraceConstants.ACTIVITY_TRACE_OPERATION_NAME;
+import static io.airbyte.metrics.lib.ApmTraceConstants.Tags.CONNECTION_ID_KEY;
+
+import datadog.trace.api.Trace;
+import io.airbyte.commons.temporal.config.WorkerMode;
+import io.airbyte.commons.temporal.exception.RetryableException;
 import io.airbyte.config.Cron;
 import io.airbyte.config.StandardSync;
 import io.airbyte.config.StandardSync.ScheduleType;
@@ -12,50 +17,62 @@ import io.airbyte.config.StandardSync.Status;
 import io.airbyte.config.helpers.ScheduleHelpers;
 import io.airbyte.config.persistence.ConfigNotFoundException;
 import io.airbyte.config.persistence.ConfigRepository;
+import io.airbyte.metrics.lib.ApmTraceUtils;
 import io.airbyte.persistence.job.JobPersistence;
 import io.airbyte.persistence.job.models.Job;
 import io.airbyte.validation.json.JsonValidationException;
-import io.airbyte.workers.temporal.exception.RetryableException;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.annotation.Value;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.DateTimeException;
 import java.time.Duration;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Supplier;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTimeZone;
 import org.quartz.CronExpression;
 
 @Slf4j
 @Singleton
-@Requires(property = "airbyte.worker.plane",
-          pattern = "(?i)^(?!data_plane).*")
+@Requires(env = WorkerMode.CONTROL_PLANE)
 public class ConfigFetchActivityImpl implements ConfigFetchActivity {
 
   private final static long MS_PER_SECOND = 1000L;
   private final static long MIN_CRON_INTERVAL_SECONDS = 60;
 
-  @Inject
-  private ConfigRepository configRepository;
-  @Inject
-  private JobPersistence jobPersistence;
-  @Value("${airbyte.worker.sync.max-attempts}")
-  private Integer syncJobMaxAttempts;
-  @Inject
-  @Named("currentSecondsSupplier")
-  private Supplier<Long> currentSecondsSupplier;
+  private final ConfigRepository configRepository;
+  private final JobPersistence jobPersistence;
+  private final Integer syncJobMaxAttempts;
+  private final Supplier<Long> currentSecondsSupplier;
 
+  public ConfigFetchActivityImpl(final ConfigRepository configRepository,
+                                 final JobPersistence jobPersistence,
+                                 @Value("${airbyte.worker.sync.max-attempts}") final Integer syncJobMaxAttempts,
+                                 @Named("currentSecondsSupplier") final Supplier<Long> currentSecondsSupplier) {
+    this.configRepository = configRepository;
+    this.jobPersistence = jobPersistence;
+    this.syncJobMaxAttempts = syncJobMaxAttempts;
+    this.currentSecondsSupplier = currentSecondsSupplier;
+  }
+
+  @Trace(operationName = ACTIVITY_TRACE_OPERATION_NAME)
+  @Override
+  public StandardSync getStandardSync(final UUID connectionId) throws JsonValidationException, ConfigNotFoundException, IOException {
+    return configRepository.getStandardSync(connectionId);
+  }
+
+  @Trace(operationName = ACTIVITY_TRACE_OPERATION_NAME)
   @Override
   public ScheduleRetrieverOutput getTimeToWait(final ScheduleRetrieverInput input) {
     try {
+      ApmTraceUtils.addTagsToTrace(Map.of(CONNECTION_ID_KEY, input.getConnectionId()));
       final StandardSync standardSync = configRepository.getStandardSync(input.getConnectionId());
 
       if (standardSync.getScheduleType() != null) {
@@ -153,29 +170,10 @@ public class ConfigFetchActivityImpl implements ConfigFetchActivity {
 
   }
 
+  @Trace(operationName = ACTIVITY_TRACE_OPERATION_NAME)
   @Override
   public GetMaxAttemptOutput getMaxAttempt() {
     return new GetMaxAttemptOutput(syncJobMaxAttempts);
-  }
-
-  @VisibleForTesting
-  void setConfigRepository(final ConfigRepository configRepository) {
-    this.configRepository = configRepository;
-  }
-
-  @VisibleForTesting
-  void setJobPersistence(final JobPersistence jobPersistence) {
-    this.jobPersistence = jobPersistence;
-  }
-
-  @VisibleForTesting
-  void setSyncJobMaxAttempts(final Integer syncJobMaxAttempts) {
-    this.syncJobMaxAttempts = syncJobMaxAttempts;
-  }
-
-  @VisibleForTesting
-  void setCurrentSecondsSupplier(final Supplier<Long> currentSecondsSupplier) {
-    this.currentSecondsSupplier = currentSecondsSupplier;
   }
 
 }

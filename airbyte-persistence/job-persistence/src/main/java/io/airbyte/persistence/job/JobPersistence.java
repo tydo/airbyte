@@ -5,9 +5,12 @@
 package io.airbyte.persistence.job;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.airbyte.commons.version.AirbyteProtocolVersionRange;
+import io.airbyte.commons.version.Version;
 import io.airbyte.config.AttemptFailureSummary;
 import io.airbyte.config.JobConfig;
 import io.airbyte.config.JobConfig.ConfigType;
+import io.airbyte.config.JobOutput;
 import io.airbyte.config.NormalizationSummary;
 import io.airbyte.config.SyncStats;
 import io.airbyte.db.instance.jobs.JobsDatabaseSchema;
@@ -27,14 +30,15 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
- * TODO Introduce a locking mechanism so that no DB operation is allowed when automatic migration is
- * running
+ * General interface methods for persistence to the Jobs database. This database is separate from
+ * the config database as job-related tables has an order of magnitude higher load and scale
+ * differently from the config tables.
  */
 public interface JobPersistence {
 
-  List<SyncStats> getSyncStats(Long attemptId) throws IOException;
+  List<SyncStats> getSyncStats(long jobId, int attemptNumber) throws IOException;
 
-  List<NormalizationSummary> getNormalizationSummary(Long attemptId) throws IOException;
+  List<NormalizationSummary> getNormalizationSummary(long jobId, int attemptNumber) throws IOException;
 
   Job getJob(long jobId) throws IOException;
 
@@ -120,7 +124,7 @@ public interface JobPersistence {
   /**
    * Sets an attempt's temporal workflow id. Later used to cancel the workflow.
    */
-  void setAttemptTemporalWorkflowId(long jobId, int attemptNumber, String temporalWorkflowId) throws IOException;
+  void setAttemptTemporalWorkflowInfo(long jobId, int attemptNumber, String temporalWorkflowId, String processingTaskQueue) throws IOException;
 
   /**
    * Retrieves an attempt's temporal workflow id. Used to cancel the workflow.
@@ -132,7 +136,7 @@ public interface JobPersistence {
    * StandardSyncOutput#state in the configs database by calling
    * ConfigRepository#updateConnectionState, which takes care of persisting the connection state.
    */
-  <T> void writeOutput(long jobId, int attemptNumber, T output, SyncStats syncStats, NormalizationSummary normalizationSummary) throws IOException;
+  void writeOutput(long jobId, int attemptNumber, JobOutput output) throws IOException;
 
   /**
    * Writes a summary of all failures that occurred during the attempt.
@@ -210,6 +214,10 @@ public interface JobPersistence {
 
   Optional<Job> getLastSyncJob(UUID connectionId) throws IOException;
 
+  List<Job> getLastSyncJobForConnections(final List<UUID> connectionIds) throws IOException;
+
+  List<Job> getRunningSyncJobForConnections(final List<UUID> connectionIds) throws IOException;
+
   Optional<Job> getFirstReplicationJob(UUID connectionId) throws IOException;
 
   Optional<Job> getNextJob() throws IOException;
@@ -236,6 +244,31 @@ public interface JobPersistence {
   void setVersion(String airbyteVersion) throws IOException;
 
   /**
+   * Get the max supported Airbyte Protocol Version
+   */
+  Optional<Version> getAirbyteProtocolVersionMax() throws IOException;
+
+  /**
+   * Set the max supported Airbyte Protocol Version
+   */
+  void setAirbyteProtocolVersionMax(Version version) throws IOException;
+
+  /**
+   * Get the min supported Airbyte Protocol Version
+   */
+  Optional<Version> getAirbyteProtocolVersionMin() throws IOException;
+
+  /**
+   * Set the min supported Airbyte Protocol Version
+   */
+  void setAirbyteProtocolVersionMin(Version version) throws IOException;
+
+  /**
+   * Get the current Airbyte Protocol Version range if defined
+   */
+  Optional<AirbyteProtocolVersionRange> getCurrentProtocolVersionRange() throws IOException;
+
+  /**
    * Returns a deployment UUID.
    */
   Optional<UUID> getDeployment() throws IOException;
@@ -252,8 +285,6 @@ public interface JobPersistence {
    * table schemas to the associated streams of records that is being exported.
    */
   Map<JobsDatabaseSchema, Stream<JsonNode>> exportDatabase() throws IOException;
-
-  Map<String, Stream<JsonNode>> dump() throws IOException;
 
   /**
    * Import all SQL tables from streams of JsonNode objects.
@@ -278,22 +309,6 @@ public interface JobPersistence {
    * Set that the secret migration has been performed.
    */
   void setSecretMigrationDone() throws IOException;
-
-  /**
-   * Check if the scheduler has been migrated to temporal.
-   *
-   * TODO (https://github.com/airbytehq/airbyte/issues/12823): remove this method after the next
-   * "major" version bump as it will no longer be needed.
-   */
-  boolean isSchedulerMigrated() throws IOException;
-
-  /**
-   * Set that the scheduler migration has been performed.
-   *
-   * TODO (https://github.com/airbytehq/airbyte/issues/12823): remove this method after the next
-   * "major" version bump as it will no longer be needed.
-   */
-  void setSchedulerMigrationDone() throws IOException;
 
   List<AttemptNormalizationStatus> getAttemptNormalizationStatusesForJob(final Long jobId) throws IOException;
 

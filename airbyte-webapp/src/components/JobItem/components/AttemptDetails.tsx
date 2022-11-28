@@ -3,30 +3,24 @@ import dayjs from "dayjs";
 import React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 
-import Status from "core/statuses";
-
-import { AttemptRead, JobConfigType } from "../../../core/request/AirbyteClient";
+import { AttemptRead, AttemptStatus } from "../../../core/request/AirbyteClient";
 import styles from "./AttemptDetails.module.scss";
 
-interface IProps {
+interface AttemptDetailsProps {
   className?: string;
   attempt: AttemptRead;
-  configType?: JobConfigType;
+  hasMultipleAttempts?: boolean;
 }
 
 const getFailureFromAttempt = (attempt: AttemptRead) => {
   return attempt.failureSummary && attempt.failureSummary.failures[0];
 };
 
-const AttemptDetails: React.FC<IProps> = ({ attempt, className, configType }) => {
+const AttemptDetails: React.FC<AttemptDetailsProps> = ({ attempt, className, hasMultipleAttempts }) => {
   const { formatMessage } = useIntl();
 
-  if (attempt.status !== Status.SUCCEEDED && attempt.status !== Status.FAILED) {
-    return (
-      <div className={classNames(styles.details, className)}>
-        <FormattedMessage id={`sources.${configType}`} defaultMessage={configType} />
-      </div>
-    );
+  if (attempt.status !== AttemptStatus.succeeded && attempt.status !== AttemptStatus.failed) {
+    return null;
   }
 
   const formatBytes = (bytes?: number) => {
@@ -66,11 +60,16 @@ const AttemptDetails: React.FC<IProps> = ({ attempt, className, configType }) =>
   const hours = Math.abs(date2.diff(date1, "hour"));
   const minutes = Math.abs(date2.diff(date1, "minute")) - hours * 60;
   const seconds = Math.abs(date2.diff(date1, "second")) - minutes * 60 - hours * 3600;
-  const isFailed = attempt.status === Status.FAILED;
+  const isFailed = attempt.status === AttemptStatus.failed;
 
   return (
     <div className={classNames(styles.container, className)}>
       <div className={styles.details}>
+        {hasMultipleAttempts && (
+          <strong className={classNames(styles.lastAttempt, { [styles.failed]: isFailed })}>
+            <FormattedMessage id="sources.lastAttempt" />
+          </strong>
+        )}
         <span>{formatBytes(attempt?.totalStats?.bytesEmitted)}</span>
         <span>
           <FormattedMessage
@@ -89,11 +88,6 @@ const AttemptDetails: React.FC<IProps> = ({ attempt, className, configType }) =>
           {hours || minutes ? <FormattedMessage id="sources.minute" values={{ minute: minutes }} /> : null}
           <FormattedMessage id="sources.second" values={{ second: seconds }} />
         </span>
-        {configType && (
-          <span>
-            <FormattedMessage id={`sources.${configType}`} defaultMessage={configType} />
-          </span>
-        )}
       </div>
       {isFailed && (
         <div className={styles.failedMessage}>

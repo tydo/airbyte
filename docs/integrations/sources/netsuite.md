@@ -2,6 +2,8 @@
 
 One unified business management suite, encompassing ERP/Financials, CRM and ecommerce for more than 31,000 customers.
 
+This connector implements the [SuiteTalk REST Web Services](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/chapter_1540391670.html) and uses REST API to fetch the customers data.
+
 ## Prerequisites
 * Oracle NetSuite [account](https://system.netsuite.com/pages/customerlogin.jsp?country=US)
 * Allowed access to all Account permissions options
@@ -41,7 +43,7 @@ One unified business management suite, encompassing ERP/Financials, CRM and ecom
 1. Go to **Setup** » **Users/Roles** » **Manage Roles** » **New**
 2. Fill the **Name** field.
 3. Scroll down to **Permissions** tab
-4. You need to select manually each record on selection lists and give **Full** level access on next tabs: (Permissions, Reports, Lists, Setup, Custom Records). You strongly need to be careful and attentive on this point.
+4. You need to select manually each record on selection lists and give at least **Read-only** level access on the next tabs: (Permissions, Reports, Lists, Setup, Custom Records). You strongly need to be careful and attentive on this point.
 5.
 #### Step 2.5:  Setup User
 1.  Go to **Setup** » **Users/Roles** » **Manage Users**
@@ -112,6 +114,7 @@ The connector is restricted by Netsuite [Concurrency Limit per Integration](http
 
 ## Changelog
 
-| Version | Date       | Pull Request                                             | Subject                                                                        |
-|:--------|:-----------|:---------------------------------------------------------|:-------------------------------------------------------------------------------|
-| 0.1.0  | 2022-09-15 | [16093](https://github.com/airbytehq/airbyte/pull/16093) | Initial Alpha release |
+| Version | Date       | Pull Request                                             | Subject                     |
+| :------ | :--------- | :------------------------------------------------------- | :-------------------------- |
+| 0.1.1   | 2022-09-28 | [17304](https://github.com/airbytehq/airbyte/pull/17304) | Migrate to per-stream state |
+| 0.1.0   | 2022-09-15 | [16093](https://github.com/airbytehq/airbyte/pull/16093) | Initial Alpha release       |

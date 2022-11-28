@@ -5,6 +5,7 @@
 package io.airbyte.config;
 
 import io.airbyte.commons.version.AirbyteVersion;
+import io.airbyte.commons.version.Version;
 import io.airbyte.config.helpers.LogConfigs;
 import io.airbyte.config.storage.CloudStorageConfigs;
 import java.net.URI;
@@ -42,6 +43,16 @@ public interface Configs {
    * Defines the Airbyte deployment version.
    */
   AirbyteVersion getAirbyteVersion();
+
+  /**
+   * Defines the max supported Airbyte Protocol Version
+   */
+  Version getAirbyteProtocolVersionMax();
+
+  /**
+   * Defines the min supported Airbyte Protocol Version
+   */
+  Version getAirbyteProtocolVersionMin();
 
   String getAirbyteVersionOrWarning();
 
@@ -569,23 +580,9 @@ public interface Configs {
   boolean shouldRunConnectionManagerWorkflows();
 
   /**
-   * Define if the worker is operating within Airbyte's Control Plane, or within an external Data
-   * Plane. - Workers in the Control Plane process tasks related to control-flow, like scheduling and
-   * routing, as well as data syncing tasks that are enqueued for the Control Plane's default task
-   * queue. - Workers in a Data Plane process only tasks related to data syncing that are specifically
-   * enqueued for that worker's particular Data Plane.
+   * Define if the worker should run notification workflows. Defaults to true. Internal-use only.
    */
-  WorkerPlane getWorkerPlane();
-
-  // Worker - Control Plane configs
-
-  /**
-   * TEMPORARY: Define a set of connection IDs that should run in Airbyte's MVP Data Plane. - This
-   * should only be set on Control-plane workers, since those workers decide which Data Plane task
-   * queue to use based on connectionId. - Will be removed in favor of the Routing Service in the
-   * future. Internal-use only.
-   */
-  Set<String> connectionIdsForMvpDataPlane();
+  public boolean shouldRunNotifyWorkflows();
 
   // Worker - Data Plane configs
 
@@ -690,6 +687,8 @@ public interface Configs {
    */
   int getActivityNumberOfAttempt();
 
+  boolean getAutoDetectSchema();
+
   enum TrackingStrategy {
     SEGMENT,
     LOGGING
@@ -715,11 +714,6 @@ public interface Configs {
     TESTING_CONFIG_DB_TABLE,
     GOOGLE_SECRET_MANAGER,
     VAULT
-  }
-
-  enum WorkerPlane {
-    CONTROL_PLANE,
-    DATA_PLANE
   }
 
 }

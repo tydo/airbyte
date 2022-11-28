@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import io.airbyte.commons.lang.Exceptions;
 import io.airbyte.commons.map.MoreMaps;
 import io.airbyte.commons.version.AirbyteVersion;
+import io.airbyte.commons.version.Version;
 import io.airbyte.config.helpers.LogClientSingleton;
 import io.airbyte.config.helpers.LogConfigs;
 import io.airbyte.config.storage.CloudStorageConfigs;
@@ -41,11 +42,14 @@ public class EnvConfigs implements Configs {
   // env variable names
   public static final String AIRBYTE_ROLE = "AIRBYTE_ROLE";
   public static final String AIRBYTE_VERSION = "AIRBYTE_VERSION";
+  public static final String AIRBYTE_PROTOCOL_VERSION_MAX = "AIRBYTE_PROTOCOL_VERSION_MAX";
+  public static final String AIRBYTE_PROTOCOL_VERSION_MIN = "AIRBYTE_PROTOCOL_VERSION_MIN";
   public static final String INTERNAL_API_HOST = "INTERNAL_API_HOST";
   public static final String AIRBYTE_API_AUTH_HEADER_NAME = "AIRBYTE_API_AUTH_HEADER_NAME";
   public static final String AIRBYTE_API_AUTH_HEADER_VALUE = "AIRBYTE_API_AUTH_HEADER_VALUE";
   public static final String WORKER_ENVIRONMENT = "WORKER_ENVIRONMENT";
   public static final String SPEC_CACHE_BUCKET = "SPEC_CACHE_BUCKET";
+  public static final String GITHUB_STORE_BRANCH = "GITHUB_STORE_BRANCH";
   public static final String WORKSPACE_ROOT = "WORKSPACE_ROOT";
   public static final String WORKSPACE_DOCKER_MOUNT = "WORKSPACE_DOCKER_MOUNT";
   public static final String LOCAL_ROOT = "LOCAL_ROOT";
@@ -79,6 +83,7 @@ public class EnvConfigs implements Configs {
   public static final String MAX_CHECK_WORKERS = "MAX_CHECK_WORKERS";
   public static final String MAX_DISCOVER_WORKERS = "MAX_DISCOVER_WORKERS";
   public static final String MAX_SYNC_WORKERS = "MAX_SYNC_WORKERS";
+  public static final String MAX_NOTIFY_WORKERS = "MAX_NOTIFY_WORKERS";
   private static final String TEMPORAL_HOST = "TEMPORAL_HOST";
   private static final String TEMPORAL_WORKER_PORTS = "TEMPORAL_WORKER_PORTS";
   private static final String TEMPORAL_HISTORY_RETENTION_IN_DAYS = "TEMPORAL_HISTORY_RETENTION_IN_DAYS";
@@ -131,11 +136,10 @@ public class EnvConfigs implements Configs {
   private static final String SHOULD_RUN_DISCOVER_WORKFLOWS = "SHOULD_RUN_DISCOVER_WORKFLOWS";
   private static final String SHOULD_RUN_SYNC_WORKFLOWS = "SHOULD_RUN_SYNC_WORKFLOWS";
   private static final String SHOULD_RUN_CONNECTION_MANAGER_WORKFLOWS = "SHOULD_RUN_CONNECTION_MANAGER_WORKFLOWS";
-  private static final String WORKER_PLANE = "WORKER_PLANE";
+  private static final String SHOULD_RUN_NOTIFY_WORKFLOWS = "SHOULD_RUN_NOTIFY_WORKFLOWS";
 
   // Worker - Control plane configs
   private static final String DEFAULT_DATA_SYNC_TASK_QUEUES = "SYNC"; // should match TemporalJobType.SYNC.name()
-  private static final String CONNECTION_IDS_FOR_MVP_DATA_PLANE = "CONNECTION_IDS_FOR_MVP_DATA_PLANE";
 
   // Worker - Data Plane configs
   private static final String DATA_SYNC_TASK_QUEUES = "DATA_SYNC_TASK_QUEUES";
@@ -180,6 +184,7 @@ public class EnvConfigs implements Configs {
 
   // defaults
   private static final String DEFAULT_SPEC_CACHE_BUCKET = "io-airbyte-cloud-spec-cache";
+  private static final String DEFAULT_GITHUB_STORE_BRANCH = "master";
   private static final String DEFAULT_JOB_KUBE_NAMESPACE = "default";
   private static final String DEFAULT_JOB_CPU_REQUIREMENT = null;
   private static final String DEFAULT_JOB_MEMORY_REQUIREMENT = null;
@@ -195,7 +200,9 @@ public class EnvConfigs implements Configs {
   private static final long DEFAULT_MAX_CHECK_WORKERS = 5;
   private static final long DEFAULT_MAX_DISCOVER_WORKERS = 5;
   private static final long DEFAULT_MAX_SYNC_WORKERS = 5;
+  private static final long DEFAULT_MAX_NOTIFY_WORKERS = 5;
   private static final String DEFAULT_NETWORK = "host";
+  private static final String AUTO_DETECT_SCHEMA = "AUTO_DETECT_SCHEMA";
 
   public static final Map<String, Function<EnvConfigs, String>> JOB_SHARED_ENVS = Map.of(
       AIRBYTE_VERSION, (instance) -> instance.getAirbyteVersion().serialize(),
@@ -229,8 +236,6 @@ public class EnvConfigs implements Configs {
     this.getAllEnvKeys = envMap::keySet;
     this.logConfigs = new LogConfigs(getLogConfiguration());
     this.stateStorageCloudConfigs = getStateStorageConfiguration().orElse(null);
-
-    validateSyncWorkflowConfigs();
   }
 
   private Optional<CloudStorageConfigs> getLogConfiguration() {
@@ -290,8 +295,22 @@ public class EnvConfigs implements Configs {
   }
 
   @Override
+  public Version getAirbyteProtocolVersionMax() {
+    return new Version(getEnvOrDefault(AIRBYTE_PROTOCOL_VERSION_MAX, "0.3.0"));
+  }
+
+  @Override
+  public Version getAirbyteProtocolVersionMin() {
+    return new Version(getEnvOrDefault(AIRBYTE_PROTOCOL_VERSION_MIN, "0.0.0"));
+  }
+
+  @Override
   public String getAirbyteVersionOrWarning() {
     return Optional.ofNullable(getEnv(AIRBYTE_VERSION)).orElse("version not set");
+  }
+
+  public String getGithubStoreBranch() {
+    return getEnvOrDefault(GITHUB_STORE_BRANCH, DEFAULT_GITHUB_STORE_BRANCH);
   }
 
   @Override
@@ -903,7 +922,8 @@ public class EnvConfigs implements Configs {
         Math.toIntExact(getEnvOrDefault(MAX_SPEC_WORKERS, DEFAULT_MAX_SPEC_WORKERS)),
         Math.toIntExact(getEnvOrDefault(MAX_CHECK_WORKERS, DEFAULT_MAX_CHECK_WORKERS)),
         Math.toIntExact(getEnvOrDefault(MAX_DISCOVER_WORKERS, DEFAULT_MAX_DISCOVER_WORKERS)),
-        Math.toIntExact(getEnvOrDefault(MAX_SYNC_WORKERS, DEFAULT_MAX_SYNC_WORKERS)));
+        Math.toIntExact(getEnvOrDefault(MAX_SYNC_WORKERS, DEFAULT_MAX_SYNC_WORKERS)),
+        Math.toIntExact(getEnvOrDefault(MAX_NOTIFY_WORKERS, DEFAULT_MAX_NOTIFY_WORKERS)));
   }
 
   @Override
@@ -932,19 +952,8 @@ public class EnvConfigs implements Configs {
   }
 
   @Override
-  public WorkerPlane getWorkerPlane() {
-    return getEnvOrDefault(WORKER_PLANE, WorkerPlane.CONTROL_PLANE, s -> WorkerPlane.valueOf(s.toUpperCase()));
-  }
-
-  // Worker - Control plane
-
-  @Override
-  public Set<String> connectionIdsForMvpDataPlane() {
-    final var connectionIds = getEnvOrDefault(CONNECTION_IDS_FOR_MVP_DATA_PLANE, "");
-    if (connectionIds.isEmpty()) {
-      return new HashSet<>();
-    }
-    return Arrays.stream(connectionIds.split(",")).collect(Collectors.toSet());
+  public boolean shouldRunNotifyWorkflows() {
+    return getEnvOrDefault(SHOULD_RUN_NOTIFY_WORKFLOWS, false);
   }
 
   // Worker - Data plane
@@ -971,22 +980,6 @@ public class EnvConfigs implements Configs {
   @Override
   public String getDataPlaneServiceAccountEmail() {
     return getEnvOrDefault(DATA_PLANE_SERVICE_ACCOUNT_EMAIL, "");
-  }
-
-  /**
-   * Ensures the user hasn't configured themselves into a corner by making sure that the worker is set
-   * up to properly process sync workflows. With sensible defaults, it should be hard to fail this
-   * validation, but this provides a safety net regardless.
-   */
-  private void validateSyncWorkflowConfigs() {
-    if (shouldRunSyncWorkflows()) {
-      if (getWorkerPlane().equals(WorkerPlane.DATA_PLANE) && getDataSyncTaskQueues().isEmpty()) {
-        throw new IllegalArgumentException(String.format(
-            "When %s is true, the worker must either be configured as a Control Plane worker, or %s must be non-empty.",
-            SHOULD_RUN_SYNC_WORKFLOWS,
-            DATA_SYNC_TASK_QUEUES));
-      }
-    }
   }
 
   @Override
@@ -1056,6 +1049,11 @@ public class EnvConfigs implements Configs {
   @Override
   public int getWorkflowFailureRestartDelaySeconds() {
     return Integer.parseInt(getEnvOrDefault(WORKFLOW_FAILURE_RESTART_DELAY_SECONDS, String.valueOf(10 * 60)));
+  }
+
+  @Override
+  public boolean getAutoDetectSchema() {
+    return getEnvOrDefault(AUTO_DETECT_SCHEMA, false);
   }
 
   @Override

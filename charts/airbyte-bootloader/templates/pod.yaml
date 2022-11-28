@@ -29,6 +29,10 @@ spec:
   {{- if .Values.affinity }}
   affinity: {{- include "common.tplvalues.render" (dict "value" .Values.affinity "context" $) | nindent 8 }}
   {{- end }}
+  {{- if .Values.extraInitContainers }}
+  initContainers:
+  {{- toYaml .Values.extraInitContainers | nindent 4 }}
+  {{- end }}
   containers:
     - name: airbyte-bootloader-container
       image: {{ printf "%s:%s" .Values.image.repository (include "bootloader.imageTag" .) }}
@@ -104,7 +108,7 @@ spec:
     {{ toYaml .Values.extraContainers | nindent 4 }}
     {{- end }}
     {{- if .Values.global.extraContainers }}
-    {{ toYaml .Values.global.extraContainers | indent 4 }}
+    {{ toYaml .Values.global.extraContainers | nindent 4 }}
     {{- end }}
   {{- if .Values.extraVolumes }}
   volumes:

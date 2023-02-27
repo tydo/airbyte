@@ -21,7 +21,7 @@
 			"type": "string"
 		},
 		"street2": {
-			"type": "string"
+			"type": ["string", "null"]
 		},
 		"city": {
 			"type": "string"
@@ -46,66 +46,10 @@
 		},
 		"marketplaceUsernames": {
 			"type": "array",
-			"items": [
-				{
-					"type": "object",
-					"properties": {
-						"customerUserId": {
-							"type": "integer"
-						},
-						"customerId": {
-							"type": "integer"
-						},
-						"createDate": {
-							"type": "string"
-						},
-						"modifyDate": {
-							"type": "string"
-						},
-						"marketplaceId": {
-							"type": "integer"
-						},
-						"marketplace": {
-							"type": "string"
-						},
-						"username": {
-							"type": "string"
-						}
-					},
-					"additionalProperties": false,
-					"required": [
-						"customerUserId",
-						"customerId",
-						"createDate",
-						"modifyDate",
-						"marketplaceId",
-						"marketplace",
-						"username"
-					]
-				}
-			],
 			"additionalItems": false
 		},
 		"tags": {
-			"type": "array",
-			"items": [
-				{
-					"type": "object",
-					"properties": {
-						"tagId": {
-							"type": "integer"
-						},
-						"name": {
-							"type": "string"
-						}
-					},
-					"additionalProperties": false,
-					"required": [
-						"tagId",
-						"name"
-					]
-				}
-			],
+			"type": ["array", "null"],
 			"additionalItems": false
 		}
 	},

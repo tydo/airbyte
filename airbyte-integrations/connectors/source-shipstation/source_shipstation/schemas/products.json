@@ -18,7 +18,7 @@
       "type": "number"
     },
     "defaultCost": {
-      "type": "integer"
+      "type": ["integer", "null"]
     },
     "length": {
       "type": ["number", "null"]
@@ -33,22 +33,22 @@
       "type": ["number", "null"]
     },
     "internalNotes": {
-      "type": "null"
+      "type": ["null", "string"]
     },
     "fulfillmentSku": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "createDate": {
       "type": "string"
     },
     "modifyDate": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "active": {
       "type": "boolean"
     },
     "productCategory": {
-      "type": "object",
+      "type": ["object", "null"],
       "properties": {
         "categoryId": {
           "type": "integer"
@@ -63,66 +63,49 @@
       "type": "null"
     },
     "warehouseLocation": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "defaultCarrierCode": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "defaultServiceCode": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "defaultPackageCode": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "defaultIntlCarrierCode": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "defaultIntlServiceCode": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "defaultIntlPackageCode": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "defaultConfirmation": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "defaultIntlConfirmation": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "customsDescription": {
-      "type": "null"
+      "type": ["string", "null"]
     },
     "customsValue": {
-      "type": "null"
+      "type": ["number", "null"]
     },
     "customsTariffNo": {
-      "type": "null"
+      "type": ["string", "null"]
     },
     "customsCountryCode": {
-      "type": "null"
+      "type": ["null", "string"]
     },
     "noCustoms": {
-      "type": "null"
+      "type": ["boolean", "null"]
     },
     "tags": {
-      "type": "array",
-      "items": [
-        {
-          "type": "object",
-          "properties": {
-            "tagId": {
-              "type": "integer"
-            },
-            "name": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "tagId",
-            "name"
-          ]
-        }
-      ]
+      "type": ["array", "null"]
     }
   },
   "required": []

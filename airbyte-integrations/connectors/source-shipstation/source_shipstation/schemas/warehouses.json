@@ -15,7 +15,7 @@
           "type": "string"
         },
         "company": {
-          "type": "string"
+          "type": ["string", "null"]
         },
         "street1": {
           "type": "string"
@@ -24,7 +24,7 @@
           "type": "string"
         },
         "street3": {
-          "type": "string"
+          "type": ["string", "null"]
         },
         "city": {
           "type": "string"
@@ -39,13 +39,13 @@
           "type": "string"
         },
         "phone": {
-          "type": "string"
+          "type": ["string", "null"]
         },
         "residential": {
-          "type": "boolean"
+          "type": ["boolean", "null"]
         },
         "addressVerified": {
-          "type": "string"
+          "type": ["string", "null"]
         }
       },
       "required": []
@@ -57,7 +57,7 @@
           "type": "string"
         },
         "company": {
-          "type": "string"
+          "type": ["string", "null"]
         },
         "street1": {
           "type": "string"
@@ -66,7 +66,7 @@
           "type": "string"
         },
         "street3": {
-          "type": "string"
+          "type": ["string", "null"]
         },
         "city": {
           "type": "string"
@@ -81,13 +81,13 @@
           "type": "string"
         },
         "phone": {
-          "type": "string"
+          "type": ["string", "null"]
         },
         "residential": {
-          "type": "string"
+          "type": ["boolean", "null"]
         },
         "addressVerified": {
-          "type": "string"
+          "type": ["string", "null"]
         }
       },
       "required": [
@@ -112,13 +112,13 @@
       "type": "boolean"
     },
     "sellerIntegrationId": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "extInventoryIdentity": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "registerFedexMeter": {
-      "type": "string"
+      "type": ["string", "null"]
     }
   },
   "required": []

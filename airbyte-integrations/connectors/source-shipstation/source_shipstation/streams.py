@@ -1,6 +1,7 @@
 from abc import ABC
 from typing import Any, Iterable, Mapping, MutableMapping, Optional
 
+import datetime
 import requests
 
 from airbyte_cdk.sources.streams.http import HttpStream
@@ -41,14 +42,38 @@ class ShipstationStream(HttpStream, ABC):
 
         return params
 
-    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+
+class IncrementalShipstationStream(ShipstationStream, ABC):
+    cursor_field = "createDate"
+
+    def _convert_date_to_timestamp(self, date: str):
+        if len(date) > 26:
+            date = date[:-1]
+        return datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%f")
+
+    def get_updated_state(self, current_stream_state: MutableMapping[str, Any], latest_record: Mapping[str, Any]) -> Mapping[str, Any]:
         """
-        :return an iterable containing each record in the response
+        Override to determine the latest state after reading the latest record. This typically compared the cursor_field from the latest record and
+        the current state and picks the 'most' recent cursor. This is how a stream's state is determined. Required for incremental.
         """
-        yield {}
+        base_date = (
+            datetime.datetime.combine(
+                datetime.date.fromtimestamp(0),
+                datetime.datetime.min.time()
+            ).strftime("%Y-%m-%dT%H:%M:%S.%f")
+        )
+        state_dt = self._convert_date_to_timestamp(current_stream_state.get(self.cursor_field, base_date))
+        latest_record = self._convert_date_to_timestamp(latest_record.get(self.cursor_field, base_date))
+        return {self.cursor_field: max(latest_record, state_dt).strftime("%Y-%m-%dT%H:%M:%S.%f0")}
+
+    def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
+        response = response.json()
+        for data in response:
+            if self.cursor_field not in stream_state or data[self.cursor_field] > stream_state[self.cursor_field]:
+                yield data
 
 
-class Customers(ShipstationStream):
+class Customers(IncrementalShipstationStream):
     primary_key = "customerId"
 
     def path(
@@ -56,11 +81,14 @@ class Customers(ShipstationStream):
     ) -> str:
         return "/customers"
 
-    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
-        yield from response.json()['customers']
+    def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
+        customers = response.json()['customers']
+        for customer in customers:
+            if self.cursor_field not in stream_state or customer[self.cursor_field] > stream_state[self.cursor_field]:
+                yield customer
 
 
-class Fulfillments(ShipstationStream):
+class Fulfillments(IncrementalShipstationStream):
     primary_key = "fulfillmentId"
 
     def path(
@@ -68,11 +96,14 @@ class Fulfillments(ShipstationStream):
     ) -> str:
         return "/fulfillments"
 
-    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
-        yield from response.json()['fulfillments']
+    def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
+        fulfillments = response.json()['fulfillments']
+        for fulfillment in fulfillments:
+            if self.cursor_field not in stream_state or fulfillment[self.cursor_field] > stream_state[self.cursor_field]:
+                yield fulfillment
 
 
-class Products(ShipstationStream):
+class Products(IncrementalShipstationStream):
     primary_key = "productId"
 
     def path(
@@ -80,11 +111,15 @@ class Products(ShipstationStream):
     ) -> str:
         return "/products"
 
-    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
-        yield from response.json()['products']
+    def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
+        products = response.json()['products']
+        for product in products:
+            if self.cursor_field not in stream_state or product[self.cursor_field] > stream_state[self.cursor_field]:
+                yield product
 
 
-class Orders(ShipstationStream):
+
+class Orders(IncrementalShipstationStream):
     primary_key = "orderId"
 
     def path(
@@ -92,11 +127,14 @@ class Orders(ShipstationStream):
     ) -> str:
         return "/orders"
 
-    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
-        yield from response.json()['orders']
+    def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
+        orders = response.json()['orders']
+        for order in orders:
+            if self.cursor_field not in stream_state or order[self.cursor_field] > stream_state[self.cursor_field]:
+                yield order
 
 
-class Stores(ShipstationStream):
+class Stores(IncrementalShipstationStream):
     primary_key = "storeId"
 
     def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
@@ -108,7 +146,7 @@ class Stores(ShipstationStream):
         return "/stores"
 
 
-class Warehouses(ShipstationStream):
+class Warehouses(IncrementalShipstationStream):
     primary_key = "warehouseId"
 
     def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
@@ -118,27 +156,6 @@ class Warehouses(ShipstationStream):
             self, stream_state: Mapping[str, Any] = None, stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
     ) -> str:
         return "/warehouses"
-
-
-class IncrementalShipstationStream(ShipstationStream, ABC):
-    state_checkpoint_interval = None
-
-    @property
-    def cursor_field(self) -> str:
-        """
-        Override to return the cursor field used by this stream e.g: an API entity might always use created_at as the cursor field. This is
-        usually id or date based. This field's presence tells the framework this in an incremental stream. Required for incremental.
-
-        :return str: The name of the cursor field.
-        """
-        return []
-
-    def get_updated_state(self, current_stream_state: MutableMapping[str, Any], latest_record: Mapping[str, Any]) -> Mapping[str, Any]:
-        """
-        Override to determine the latest state after reading the latest record. This typically compared the cursor_field from the latest record and
-        the current state and picks the 'most' recent cursor. This is how a stream's state is determined. Required for incremental.
-        """
-        return {}
 
 
 class Employees(IncrementalShipstationStream):

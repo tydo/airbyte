@@ -22,13 +22,14 @@ class SourceShipstation(AbstractSource):
         :return Tuple[bool, any]: (True, None) if the input config can be used to connect to the API successfully, (False, error) otherwise.
         """
         auth = HTTPBasicAuth(username=config["api_key"], password=config["api_secret"])
-        try:
-            Fulfillments(authenticator=auth)
-            connection = True, None
-        except Exception as e:
-            connection = False, e
+        response = requests.get('https://ssapi.shipstation.com/users', auth=auth)
 
-        return connection
+        try:
+            response.raise_for_status()
+        except HTTPError as e:
+            return False, e
+
+        return True, None
 
     def streams(self, config: Mapping[str, Any]) -> List[Stream]:
         """

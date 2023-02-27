@@ -27,19 +27,19 @@
       "type": "string"
     },
     "voidDate": {
-      "type": "null"
+      "type": ["null", "string"]
     },
     "deliveryDate": {
-      "type": "null"
+      "type": ["null", "string"]
     },
     "carrierCode": {
       "type": "string"
     },
     "fulfillmentProviderCode": {
-      "type": "null"
+      "type": ["null", "string"]
     },
     "fulfillmentServiceCode": {
-      "type": "null"
+      "type": ["null", "string"]
     },
     "fulfillmentFee": {
       "type": "integer"
@@ -54,7 +54,7 @@
       "type": "boolean"
     },
     "notifyErrorMessage": {
-      "type": "null"
+      "type": ["null", "string"]
     },
     "shipTo": {
       "type": "object",
@@ -63,16 +63,16 @@
           "type": "string"
         },
         "company": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "street1": {
           "type": "string"
         },
         "street2": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "street3": {
-          "type": "null"
+          "type": ["null", "string"]
         },
         "city": {
           "type": "string"
@@ -90,10 +90,10 @@
           "type": "string"
         },
         "residential": {
-          "type": "null"
+          "type": ["null", "boolean"]
         },
         "addressVerified": {
-          "type": "null"
+          "type": ["null", "boolean"]
         }
       },
       "required": []
